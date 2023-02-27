@@ -16,10 +16,11 @@ class createGraph(object):
         transitions = data["Transitions"]
         acceptance = data["Acceptance"]
         for transition in transitions:
+            nfa.node(str(transition[1]), shape='circle')
             if transition[7] in acceptance:
                 nfa.node(str(transition[7]), shape='doublecircle')
-            nfa.node(str(transition[1]), shape='circle')
-            nfa.node(str(transition[7]), shape='circle')
+            else:
+                nfa.node(str(transition[7]), shape='circle')
             nfa.edge(str(transition[1]), str(
                 transition[7]), label=transition[4])
 

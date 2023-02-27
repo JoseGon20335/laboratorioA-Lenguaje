@@ -19,7 +19,7 @@ def main():
     # expresion = '(a|b)*a(a|b)(a|b)'
     # expresionInput = input('Ingrese el redex a evaluar. Por ejemplo: a|b')
     # expresion = evaluateInput().evaluate(expresionInput)
-    expresion = 'a.b.a*'
+    expresion = 'a*'
 
     nfa = NFA().thompson(expresion)
     print(nfa)

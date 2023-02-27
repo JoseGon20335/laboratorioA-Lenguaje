@@ -22,7 +22,7 @@ class NFA(object):
     def thompson(this, expresionRegular):
         postFix = postfix.passToPostFix(expresionRegular)
         nfaStack = []
-        print(postFix)
+        print("postfix", postFix)
 
         for c in postFix:
             if c == '*':
@@ -91,35 +91,26 @@ class NFA(object):
                 nfaStack.append(NFA(initial, accept))
 
         this.automata = nfaStack.pop()
-        # this.prepareData([this.automata.initial], [])
-        temp = []
-        tempInitial = [this.automata.initial]
-        tempState = tempInitial.pop()
-
-        if tempState not in temp:
-            temp.append(tempState)
-
-            if tempState.edge1:
-                tempInitial.append(tempState.edge1)
-
-            if tempState.edge2:
-                tempInitial.append(tempState.edge2)
-
-        while len(tempInitial) > 0:
-            tempState = tempInitial.pop()
-            if tempState not in temp:
-                temp.append(tempState)
-
-            if tempState.edge1:
-                tempInitial.append(tempState.edge1)
-
-            if tempState.edge2:
-                tempInitial.append(tempState.edge2)
-
-        stateTemp = this.aceptance(temp, tempState)
-        this.transitions(temp, tempState, stateTemp)
+        this.prepareResult([this.automata.initial], [])
 
         return({"Transitions": this.autoTransitions, "Acceptance": this.autoAccept})
+
+    def prepareResult(this, queue, stack):
+        state = queue.pop()
+
+        if state not in stack:
+            stack.append(state)
+
+            if state.edge1:
+                queue.append(state.edge1)
+
+            if state.edge2:
+                queue.append(state.edge2)
+        if len(queue) > 0:
+            this.prepareResult(queue, stack)
+        else:
+            stateTemp = this.aceptance(stack, state)
+            this.transitions(stack, state, stateTemp)
 
     def aceptance(this, stack, state):
         allStates = []
@@ -179,76 +170,3 @@ class NFA(object):
                 allTransitions.append(newTransition)
 
         this.autoTransitions = allTransitions
-
-    # def trasformaciones(this, queue, stack) -> None:
-    #     state = queue.pop()
-
-    #     if state not in stack:
-    #         stack.append(state)
-
-    #         if state.edge1:
-    #             queue.append(state.edge1)
-
-    #         if state.edge2:
-    #             queue.append(state.edge2)
-
-    #     if len(queue) > 0:
-    #         this.prepareData(queue, stack)
-    #     else:
-    #         allStates = []
-    #         allSimbols = []
-    #         allTransitions = []
-    #         accept = []
-
-    #         allStatesTemp = {}
-
-    #         counter = 0
-    #         for state in stack:
-    #             num = str(counter)
-
-    #             if state == this.automata.accept:
-    #                 num = str(len(stack) - 1 + len(accept))
-    #                 accept.append(num)
-    #             else:
-    #                 allStates.append(num)
-    #                 counter += 1
-
-    #             allStatesTemp[state] = num
-
-    #             if state.label is None:
-    #                 state.label = "E"
-
-    #             if state.label not in allSimbols:
-    #                 allSimbols.append(state.label)
-
-    #         allStates = allStates + accept
-
-    #         for state in stack:
-    #             if state.edge1:
-    #                 nextState = (allStatesTemp[state.edge1])
-
-    #                 prev = allStatesTemp[state]
-    #                 prevLabel = state.label
-
-    #                 newTransition = "(" + prev + ", " + \
-    #                     prevLabel + ", " + nextState + ")"
-    #                 allTransitions.append(newTransition)
-
-    #             if state.edge2:
-    #                 nextState = (allStatesTemp[state.edge2])
-
-    #                 prev = allStatesTemp[state]
-    #                 prevLabel = state.label
-
-    #                 newTransition = "(" + prev + ", " + \
-    #                     prevLabel + ", " + nextState + ")"
-    #                 allTransitions.append(newTransition)
-
-    #         automata = {
-    #             "states": allStates,
-    #             "simbols": allSimbols,
-    #             "transitions": allTransitions,
-    #             "accept": accept
-    #         }
-
-    #         this.data = automata
