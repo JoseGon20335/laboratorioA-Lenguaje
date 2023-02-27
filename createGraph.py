@@ -21,6 +21,6 @@ class createGraph(object):
             nfa.node(str(transition[1]), shape='circle')
             nfa.node(str(transition[7]), shape='circle')
             nfa.edge(str(transition[1]), str(
-                transition[7]), label=transition[5])
+                transition[7]), label=transition[4])
 
         nfa.view()
