@@ -9,54 +9,18 @@ class createGraph(object):
     def __init__(this, data=None) -> None:
         this.data = data
 
-    def createNfa(this, data):
-        # nfa = Digraph('NFA', 'resultado')
-        # nfa.graph_attr['rankdir'] = 'LR'  # Left to Right graph orientation
+    def createNfa(this, data, alfabeto):
+        nfa = Digraph('NFA', 'resultado')
+        nfa.graph_attr['rankdir'] = 'LR'  # Left to Right graph orientation
 
-        # transitions = data{'transitions'}
         transitions = data["Transitions"]
         acceptance = data["Acceptance"]
-        # Add states and acceptance states to the NFA
-        # for state in acceptance:
-        #     nfa.node(str(state), shape='doublecircle')
-        # nfa.node('start', shape='point')
         for transition in transitions:
-            print(transition)
-            temp = 0
-            for t in transition:
-                if temp == 2:
-                    print(t)
-                temp += 1
+            if transition[7] in acceptance:
+                nfa.node(str(transition[7]), shape='doublecircle')
+            nfa.node(str(transition[1]), shape='circle')
+            nfa.node(str(transition[7]), shape='circle')
+            nfa.edge(str(transition[1]), str(
+                transition[7]), label=transition[5])
 
-                # nfa.node(str(t), shape='circle')
-
-        # Add start and end nodes to the NFA
-        # nfa.edge('start', str(transitions[0][0]))
-
-        # return nfa
-
-    def toGraph(self, automaton, name):
-        g = Digraph('AFN', filename=name)
-        g.attr(rankdir='LR')
-
-        for state in automaton.states.elements:
-            if state.type == 'inicial':
-                g.node(str(state.id), shape='circle')
-                g.node('', shape='none', height='0', width='0')
-                g.edge('', str(state.id))
-
-            elif state.type == 'final_inicial':
-                g.node(str(state.id), shape='doublecircle')
-                g.node('', shape='none', height='0', width='0')
-                g.edge('', str(state.id))
-
-            elif state.type == 'final':
-                g.node(str(state.id), shape='doublecircle')
-            else:
-                g.node(str(state.id), shape='circle')
-
-        for transition in automaton.transitions:
-            g.edge(str(transition[0].id), str(
-                transition[1].id), label=transition[2])
-
-        g.view()
+        nfa.view()
