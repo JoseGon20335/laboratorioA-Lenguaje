@@ -22,9 +22,10 @@ class NFA(object):
     def thompson(this, expresionRegular):
         postFix = postfix.passToPostFix(expresionRegular)
         nfaStack = []
-        print("postfix", postFix)
+        print("postfix: aa?b*.c+|.b.ba.a.| :", postFix)
 
         for c in postFix:
+            print("c", c)
             if c == '*':
                 nfa1 = nfaStack.pop()
                 initial = state()
