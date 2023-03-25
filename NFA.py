@@ -2,172 +2,160 @@
 import postfix
 
 
-class state:
-    label, edge1, edge2 = None, None, None
+class Node:
+    def __init__(this, name):
+        this.name = name
+        this.transitions = []
+
+
+class Transition:
+    def __init__(this, symbol, destination):
+        this.symbol = symbol
+        this.destination = destination
 
 
 class NFA(object):
-    initial, accept = None, None
-    automata = None
-    data = None
+    autoTransitions = []
+    autoAccept = []
+    valorSuma = ''
 
-    autoStates = None
-    autoSimbols = None
-    autoTransitions = None
-    autoAccept = None
-
-    def __init__(this, initial=None, accept=None) -> None:
-        this.initial, this.accept = initial, accept
+    def __init__(this, nodes=None) -> None:
+        this.nodes = nodes
 
     def thompson(this, expresionRegular):
         postFix = postfix.passToPostFix(expresionRegular)
         nfaStack = []
         print("postfix: aa?b*.c+|.b.ba.a.| :", postFix)
-
+        nodoNum = 0
         for c in postFix:
             print("c", c)
             if c == '*':
-                nfa1 = nfaStack.pop()
-                initial = state()
-                accept = state()
+                print("entro *", c)
+                candado = nfaStack.pop()
+                candado1 = candado.nodes[0]  # 0
+                candado2 = candado.nodes[1]  # 1
+                nodo1 = Node(nodoNum)  # 2
+                nodoNum += 1
+                nodo2 = Node(nodoNum)  # 3
 
-                initial.edge1 = nfa1.initial
-                initial.edge2 = accept
-                nfa1.accept.edge1 = nfa1.initial
-                nfa1.accept.edge2 = accept
+                simbolo = ''
+                transitions = candado1.transitions
+                for transition in transitions:
+                    if transition.destination == candado2:
+                        simbolo = transition.symbol
+                        transition.symbol = 'ε'
 
-                nfaStack.append(NFA(initial, accept))
+                transitions = candado2.transitions
+                transitions.append(Transition(simbolo, nodo1))
+
+                transitions = nodo1.transitions
+                transitions.append(Transition('ε', candado2))
+                transitions.append(Transition('ε', nodo2))
+
+                transitions = nodo2.transitions
+                transitions.append(Transition('ε', candado1))
+
+                # grupo = [candado1, candado2]
+                # nfaStack.append(NFA(grupo))
+                # grupo = [nodo1, nodo2]
+                # nfaStack.append(NFA(grupo))
+                grupo = [candado1, candado2, nodo1, nodo2]
+                nfaStack.append(NFA(grupo))
+                this.autoAccept.pop()
+                this.autoAccept.append(nodo2.name)
 
             elif c == '.':
-                nfa2 = nfaStack.pop()
-                nfa1 = nfaStack.pop()
+                nodoG2 = nfaStack.pop()
+                nodoG1 = nfaStack.pop()
+                nodo1 = nodoG1.nodes.pop()
+                nodo2 = nodoG2.nodes[0]
+                # tomo el segundo elemento del nodo2
 
-                nfa1.accept.edge1 = nfa2.initial
-
-                nfaStack.append(NFA(nfa1.initial, nfa2.accept))
+                nodo1.transitions.append(Transition('.', nodo2))
+                # transitions = nodo1.transitions
+                # transition.append(Transition('.', nodo2))
+                nodoG1.nodes.append(nodo1)
+                nfaStack.append(nodoG1)
+                nfaStack.append(nodoG2)
 
             elif c == '|':
-                nfa2 = nfaStack.pop()
-                nfa1 = nfaStack.pop()
-                initial = state()
+                orExp2 = nfaStack.pop()
+                orExp1 = nfaStack.pop()
+                orExp11 = orExp1.nodes[0]  # 0 a
+                orExp12 = orExp1.nodes[1]  # 1
+                orExp21 = orExp2.nodes[0]  # 2 b
+                orExp22 = orExp2.nodes[1]  # 3
+                nodo1 = Node(nodoNum)  # 4
+                nodoNum += 1
+                nodo2 = Node(nodoNum)  # 5
 
-                initial.edge1 = nfa1.initial
-                initial.edge2 = nfa2.initial
+                simbolo = ''
+                transitions = orExp11.transitions
+                for transition in transitions:
+                    if transition.destination == orExp12:
+                        simbolo = transition.symbol
+                        transition.symbol = 'ε'
 
-                accept = state()
-                nfa1.accept.edge1 = accept
-                nfa2.accept.edge1 = accept
+                transitions = orExp12.transitions
+                transitions.append(Transition(simbolo, orExp21))
 
-                nfaStack.append(NFA(initial, accept))
+                simbolo = ''
+                transitions = orExp21.transitions
+                for transition in transitions:
+                    if transition.destination == orExp22:
+                        simbolo = transition.symbol
+                        transitions.remove(transition)
 
-            elif c == '+':
-                nfa1 = nfaStack.pop()
-                accept = state()
-                initial = state()
+                transitions = orExp11.transitions
+                transitions.append(Transition('ε', orExp22))
 
-                initial.edge1 = nfa1.initial
-                nfa1.accept.edge1 = nfa1.initial
-                nfa1.accept.edge2 = accept
+                transitions = orExp22.transitions
+                transitions.append(Transition(simbolo, nodo1))
 
-                nfaStack.append(NFA(initial, accept))
+                transitions = nodo1.transitions
+                transitions.append(Transition('ε', nodo2))
 
-            elif c == '?':
-                nfa1 = nfaStack.pop()
-                accept = state()
-                initial = state()
+                transitions = orExp21.transitions
+                transitions.append(Transition('ε', nodo2))
 
-                initial.edge1 = nfa1.initial
-                initial.edge2 = accept
-
-                nfa1.accept.edge1 = accept
-                nfaStack.append(NFA(initial, accept))
+                # grupo = [orExp11, orExp12]
+                # nfaStack.append(NFA(grupo))
+                # grupo = [orExp21, orExp22]
+                # nfaStack.append(NFA(grupo))
+                # grupo = [nodo1, nodo2]
+                # nfaStack.append(NFA(grupo))
+                grupo = [orExp11, orExp12, orExp21, orExp22, nodo1, nodo2]
+                nfaStack.append(NFA(grupo))
+                this.autoAccept.pop()
+                this.autoAccept.append(nodo2.name)
 
             else:
-                accept = state()
-                initial = state()
+                nodo1 = Node(nodoNum)
+                nodoNum += 1
+                nodo2 = Node(nodoNum)
+                transitions = nodo1.transitions
+                transitions.append(Transition(c, nodo2))
+                this.valorSuma = c
+                grupo = [nodo1, nodo2]
+                nfaStack.append(NFA(grupo))
+                if this.autoAccept != []:
+                    this.autoAccept.pop()
+                    this.autoAccept.append(nodo2.name)
+                else:
+                    this.autoAccept.append(nodo2.name)
 
-                initial.label = c
-                initial.edge1 = accept
+            nodoNum += 1
 
-                nfaStack.append(NFA(initial, accept))
-
-        this.automata = nfaStack.pop()
-        this.prepareResult([this.automata.initial], [])
+        this.dataToGraph(nfaStack)
+        print("data", this.autoTransitions)
 
         return({"Transitions": this.autoTransitions, "Acceptance": this.autoAccept})
 
-    def prepareResult(this, queue, stack):
-        state = queue.pop()
+    def dataToGraph(this, data):
 
-        if state not in stack:
-            stack.append(state)
-
-            if state.edge1:
-                queue.append(state.edge1)
-
-            if state.edge2:
-                queue.append(state.edge2)
-        if len(queue) > 0:
-            this.prepareResult(queue, stack)
-        else:
-            stateTemp = this.aceptance(stack, state)
-            this.transitions(stack, state, stateTemp)
-
-    def aceptance(this, stack, state):
-        allStates = []
-        allSimbols = []
-        accept = []
-
-        allStatesTemp = {}
-
-        counter = 0
-        for state in stack:
-            num = str(counter)
-
-            if state == this.automata.accept:
-                num = str(len(stack) - 1 + len(accept))
-                accept.append(num)
-            else:
-                allStates.append(num)
-                counter += 1
-
-            allStatesTemp[state] = num
-
-            if state.label is None:
-                state.label = "E"
-
-            if state.label not in allSimbols:
-                allSimbols.append(state.label)
-
-        allStates = allStates + accept
-
-        this.autoStates = allStates,
-        this.autoSimbols = allSimbols,
-        this.autoAccept = accept
-        return(allStatesTemp)
-
-    def transitions(this, stack, state, allStatesTemp):
-        allTransitions = []
-
-        for state in stack:
-            if state.edge1:
-                nextState = (allStatesTemp[state.edge1])
-
-                prev = allStatesTemp[state]
-                prevLabel = state.label
-
-                newTransition = "(" + prev + ", " + \
-                    prevLabel + ", " + nextState + ")"
-                allTransitions.append(newTransition)
-
-            if state.edge2:
-                nextState = (allStatesTemp[state.edge2])
-
-                prev = allStatesTemp[state]
-                prevLabel = state.label
-
-                newTransition = "(" + prev + ", " + \
-                    prevLabel + ", " + nextState + ")"
-                allTransitions.append(newTransition)
-
-        this.autoTransitions = allTransitions
+        for i in data:
+            nodes = i.nodes
+            for j in nodes:
+                for y in j.transitions:
+                    res = j.name, y.symbol, y.destination.name
+                    this.autoTransitions.append(res)
